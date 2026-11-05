@@ -1,4 +1,45 @@
 /**
+ * 📱 휴대폰 화면 맞춤
+ *  - 휴대폰 브라우저는 주소창 때문에 실제 보이는 높이가 100vh보다 작아서 아래가 잘립니다.
+ *    그래서 "지금 실제로 보이는 높이"를 재서 --vh / --app-h 로 CSS에 알려 줍니다.
+ *  - 가로/세로를 돌리면 잠시 뒤 크기를 다시 재고, 게임 화면도 다시 맞춥니다.
+ */
+(function () {
+  const root = document.documentElement;
+  let last = '';
+  function measure() {
+    const vv = window.visualViewport;
+    const h = Math.round(vv ? vv.height : window.innerHeight);
+    const w = Math.round(vv ? vv.width : window.innerWidth);
+    const key = w + 'x' + h;
+    if (key === last) return false;
+    last = key;
+    root.style.setProperty('--vh', (h / 100) + 'px');
+    root.style.setProperty('--vw', (w / 100) + 'px');
+    root.style.setProperty('--app-h', h + 'px');
+    root.style.setProperty('--app-w', w + 'px');
+    root.classList.toggle('is-portrait', h >= w);
+    root.classList.toggle('is-landscape', w > h);
+    root.classList.toggle('is-short', h < 500);
+    return true;
+  }
+  function refresh() {
+    if (measure()) window.dispatchEvent(new Event('resize'));
+    window.scrollTo(0, 0);
+  }
+  measure();
+  window.addEventListener('resize', measure);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', refresh);
+  // 화면을 돌린 직후에는 크기가 바로 바뀌지 않는 기기가 많아서 몇 번 나눠 다시 잼
+  const onRotate = () => { [60, 250, 600, 1000].forEach(t => setTimeout(refresh, t)); };
+  window.addEventListener('orientationchange', onRotate);
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', onRotate);
+  // 주소창이 사라지고 나타날 때 등
+  window.addEventListener('pageshow', onRotate);
+  document.addEventListener('DOMContentLoaded', onRotate);
+})();
+
+/**
  * COLOR UP SCHOOL - Audio Engine (Web Audio API Synthesizer)
  * Generates retro 8/16-bit RPG BGM and Sound Effects dynamically without external MP3 dependencies!
  */
@@ -15,6 +56,16 @@ class SoundEngine {
     this.tempo = 115;
     this.step = 0;
     this.activeOscillators = [];
+    this.allAudios = new Set();
+    // 효과음(기계음)은 배경음악과 겹쳐 들려서 꺼 둡니다. 다시 쓰려면 true로 바꾸세요.
+    this.sfxEnabled = false;
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.pauseForHidden(); else this.resumeFromHidden();
+    });
+    // 자동재생이 막혔던 곡은 다음 터치 때 재생
+    document.addEventListener('pointerdown', () => {
+      if (this.pendingTrack && !this.loadingFile) { const t = this.pendingTrack; this.pendingTrack = null; this.playBGM(t); }
+    }, true);
   }
 
   init() {
@@ -72,7 +123,7 @@ class SoundEngine {
   // Sound Effects (SFX)
   // --------------------------------------------------------------------------
   playClick() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -88,7 +139,7 @@ class SoundEngine {
   }
 
   playDialogueBlip() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -104,7 +155,7 @@ class SoundEngine {
   }
 
   playStatUp() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
     notes.forEach((freq, idx) => {
@@ -122,7 +173,7 @@ class SoundEngine {
   }
 
   playColorRestore() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const chord = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
     chord.forEach((freq, i) => {
@@ -140,7 +191,7 @@ class SoundEngine {
   }
 
   playBadgeUnlock() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const melody = [
       { f: 523.25, t: 0.1 }, { f: 659.25, t: 0.1 }, { f: 783.99, t: 0.1 },
@@ -163,7 +214,7 @@ class SoundEngine {
   }
 
   playBossHit() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -179,7 +230,7 @@ class SoundEngine {
   }
 
   playPurifyLaser() {
-    if (this.isMuted || !this.ctx) return;
+    if (!this.sfxEnabled || this.isMuted || !this.ctx) return;
     this.resume();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -199,28 +250,63 @@ class SoundEngine {
   // --------------------------------------------------------------------------
   // 🎵 직접 만든 음악 파일 재생 (assets/audio/bgm_*.mp3 또는 .m4a)
   //    파일이 없으면 예전처럼 기계음 음악으로 자동 대체됩니다.
+  // 배경음악은 항상 "한 곡만" 재생합니다.
+  //  - 여러 번 눌러도, 곡을 빠르게 바꿔도 마지막으로 요청한 곡만 남고 나머지는 즉시 멈춥니다.
+  //  - 휴대폰(특히 아이폰)은 음량 조절이 안 되므로 페이드 대신 바로 멈춥니다.
   playBGM(trackName = 'exploration') {
     const fileKey = { title: 'title', monochrome: 'school', exploration: 'school', boss: 'boss', victory: 'ending' }[trackName] || 'school';
+    this.wantedFile = fileKey;
     if (this.currentFile === fileKey && this.fileAudio && !this.fileAudio.paused) return;
+    if (this.loadingFile === fileKey) return;          // 같은 곡을 이미 불러오는 중
     this.init(); this.resume();
+    const token = (this.bgmToken = (this.bgmToken || 0) + 1);
+    this.loadingFile = fileKey;
+    this.stopAllMusic();                                 // 지금 나오는 곡은 바로 끔
     const vol = { title: 0.6, school: 0.38, boss: 0.5, ending: 0.6 }[fileKey];
     const tryPlay = (exts) => {
-      if (!exts.length) { this.currentFile = null; this.playSynthBGM(trackName); return; }
+      if (token !== this.bgmToken) return;
+      if (!exts.length) { this.loadingFile = null; this.currentFile = null; return; }
       const a = new Audio(`assets/audio/bgm_${fileKey}.${exts[0]}`);
-      a.loop = fileKey !== 'ending' ? true : true;
+      a.loop = true; a.preload = 'auto';
       a.volume = vol; a.muted = this.isMuted;
-      a.addEventListener('error', () => tryPlay(exts.slice(1)), { once: true });
+      this.allAudios.add(a);
+      a.addEventListener('error', () => { this.killAudio(a); tryPlay(exts.slice(1)); }, { once: true });
       a.play().then(() => {
-        this.stopBGM();
-        if (this.fileAudio && this.fileAudio !== a) this.fadeOut(this.fileAudio);
+        if (token !== this.bgmToken) { this.killAudio(a); return; }   // 그새 다른 곡을 요청함
+        this.allAudios.forEach(o => { if (o !== a) this.killAudio(o); });
         this.fileAudio = a; this.currentFile = fileKey; this.currentTrack = trackName;
-      }).catch(err => { if (err && err.name === 'NotAllowedError') this.pendingTrack = trackName; });
+        this.loadingFile = null; this.pendingTrack = null;
+      }).catch(err => {
+        this.killAudio(a);
+        if (token !== this.bgmToken) return;
+        this.loadingFile = null;
+        if (err && err.name === 'NotAllowedError') this.pendingTrack = trackName;
+      });
     };
     tryPlay(['mp3', 'm4a']);
   }
 
-  fadeOut(a) {
-    const t = setInterval(() => { a.volume = Math.max(0, a.volume - 0.05); if (a.volume <= 0.01) { a.pause(); clearInterval(t); } }, 60);
+  killAudio(a) {
+    if (!a) return;
+    try { a.pause(); a.currentTime = 0; } catch (e) {}
+    this.allAudios.delete(a);
+    if (this.fileAudio === a) { this.fileAudio = null; this.currentFile = null; }
+  }
+
+  stopAllMusic() {
+    [...this.allAudios].forEach(a => this.killAudio(a));
+    this.fileAudio = null; this.currentFile = null;
+  }
+
+  fadeOut(a) { this.killAudio(a); }
+
+  // 앱 전환·화면 꺼짐 때 음악 멈추고, 돌아오면 다시 재생
+  pauseForHidden() {
+    if (this.fileAudio && !this.fileAudio.paused) { this.fileAudio.pause(); this.resumeOnShow = true; }
+  }
+  resumeFromHidden() {
+    if (this.resumeOnShow && this.fileAudio) { this.fileAudio.play().catch(() => {}); }
+    this.resumeOnShow = false;
   }
 
   // 음악 파일이 없을 때: 기계음 음악은 끄고 조용히 둠

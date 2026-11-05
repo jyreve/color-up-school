@@ -33,6 +33,7 @@ class GameApp {
     this.bindModals();
     this.enhanceUI();
     this.placeNPCs();
+    this.setupDialogueSafety();
 
     // Start Master RAF Loop
     requestAnimationFrame((t) => this.gameLoop(t));
@@ -129,6 +130,8 @@ class GameApp {
       if (e.key === ' ' || e.key === 'Enter') {
         if (!this.isDialogueActive) {
           this.tryInteract();
+        } else if (this.isTyping) {
+          this.finishTyping();
         } else if (!this.isTyping && this.currentDialogueData && (!this.currentDialogueData.choices || this.currentDialogueData.choices.length === 0)) {
           this.closeDialogue();
         }
@@ -706,11 +709,10 @@ class GameApp {
 
   startDialogue(npc) {
     if (this.isDialogueActive) return;
-    this.isDialogueActive = true;
-    this.currentNPC = npc;
-
     const scenario = window.scenarioManager.scenarios[npc.scenarioKey];
     if (!scenario) return;
+    this.isDialogueActive = true;
+    this.currentNPC = npc;
 
     // Check if this NPC's mission has already been cleared!
     const isAlreadyResolved = window.scenarioManager.resolvedScenarios.includes(npc.scenarioKey);
@@ -786,18 +788,120 @@ class GameApp {
 
     let idx = 0;
     if (this.typewriterTimer) clearInterval(this.typewriterTimer);
+    this._tw = { fullText, onComplete, textEl, done: false };
+    const tw = this._tw;
 
     this.typewriterTimer = setInterval(() => {
+      if (tw.done) { clearInterval(this.typewriterTimer); return; }
       if (idx < fullText.length) {
         if (textEl) textEl.textContent += fullText.charAt(idx);
         // (대사 '삐삐' 소리는 꺼 둠)
         idx++;
       } else {
-        clearInterval(this.typewriterTimer);
-        this.isTyping = false;
-        if (onComplete) onComplete();
+        this.finishTyping();
       }
     }, 18);
+  }
+
+  // 글자가 다 나오기 전에 화면을 누르면 바로 전체 문장 보이기
+  finishTyping() {
+    const tw = this._tw;
+    if (!tw || tw.done) return;
+    tw.done = true;
+    if (this.typewriterTimer) clearInterval(this.typewriterTimer);
+    if (tw.textEl) tw.textEl.textContent = tw.fullText;
+    this.isTyping = false;
+    if (tw.onComplete) tw.onComplete();
+  }
+
+  // --------------------------------------------------------------------------
+  // 🛟 대화가 멈췄을 때를 대비한 안전장치
+  //  - 대화창 오른쪽 위 [← 나가기] 버튼: 언제든 대화를 닫고 학교로 돌아감 (진행 상황은 그대로)
+  //  - 휴대폰 '뒤로가기' 버튼/제스처도 대화창·팝업 닫기로 동작
+  //  - 대사가 다 나왔는데 선택지도 다음 버튼도 없으면 자동으로 [다음] 버튼을 다시 보여 줌
+  // --------------------------------------------------------------------------
+  setupDialogueSafety() {
+    const box = document.getElementById('dialogue-box');
+    if (!box) return;
+    if (!document.getElementById('dlg-exit-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'dlg-exit-btn';
+      btn.className = 'dlg-exit-btn';
+      btn.type = 'button';
+      btn.innerHTML = '<span>←</span> 나가기';
+      btn.title = '대화를 닫고 학교로 돌아가기 (지금까지 한 것은 저장돼요)';
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this.exitDialogue(); });
+      box.appendChild(btn);
+    }
+    // 대사 영역을 누르면 글자 바로 다 보이기
+    const win = box.querySelector('.arpia-dialogue-window');
+    if (win) win.addEventListener('click', (e) => {
+      if (this.isTyping && !e.target.closest('button')) this.finishTyping();
+    });
+
+    // 휴대폰 뒤로가기
+    try { history.replaceState({ cus: 'base' }, ''); history.pushState({ cus: 'game' }, ''); } catch (e) {}
+    window.addEventListener('popstate', () => {
+      const handled = this.closeTopLayer();
+      try { history.pushState({ cus: 'game' }, ''); } catch (e) {}
+      if (!handled) this.showToast('🏫 게임을 끝내려면 브라우저 탭을 닫아 주세요.', '#a78bfa');
+    });
+
+    // 막힘 감시
+    setInterval(() => this.dialogueWatchdog(), 900);
+  }
+
+  exitDialogue() {
+    if (!this.isDialogueActive) return;
+    if (this.typewriterTimer) clearInterval(this.typewriterTimer);
+    if (this._tw) this._tw.done = true;
+    this.isTyping = false;
+    const rm = document.getElementById('mission-reward-modal');
+    if (rm && !rm.classList.contains('hidden')) {
+      // 보상 창이 떠 있으면 확인 버튼을 대신 눌러 보상은 받은 채로 닫기
+      const ok = document.getElementById('btn-reward-confirm');
+      if (ok) ok.click();
+      if (this._tw) this._tw.done = true;
+      if (this.typewriterTimer) clearInterval(this.typewriterTimer);
+    }
+    this.closeDialogue();
+    if (window.soundEngine) window.soundEngine.playClick();
+  }
+
+  // 맨 위에 떠 있는 창 하나 닫기 (닫았으면 true)
+  closeTopLayer() {
+    const modals = [...document.querySelectorAll('.modal-backdrop:not(.hidden), .rpg-modal-backdrop:not(.hidden)')]
+      .filter(m => m.offsetParent !== null || getComputedStyle(m).display !== 'none');
+    const top = modals[modals.length - 1];
+    if (top) {
+      const closeBtn = top.querySelector('.modal-close, .close-btn, [id^="btn-close"], .btn-close, [data-close]');
+      if (closeBtn) { closeBtn.click(); return true; }
+      if (top.id !== 'mission-reward-modal') { top.classList.add('hidden'); return true; }
+    }
+    if (this.isDialogueActive) { this.exitDialogue(); return true; }
+    return false;
+  }
+
+  dialogueWatchdog() {
+    if (!this.isDialogueActive || this.isTyping) { this._stuck = 0; return; }
+    const box = document.getElementById('dialogue-box');
+    const prompt = document.getElementById('dialogue-next-prompt');
+    const choices = document.getElementById('dialogue-choices');
+    const think = document.getElementById('think-panel');
+    const anyModal = document.querySelector('.modal-backdrop:not(.hidden)');
+    const overlay = document.querySelector('.p2-overlay');
+    const hasChoices = choices && choices.querySelector('button:not([disabled])');
+    const thinkOpen = think && !think.classList.contains('hidden') && think.querySelector('button:not([disabled])');
+    const promptOn = prompt && !prompt.classList.contains('hidden');
+    const boxHidden = !box || box.classList.contains('hidden');
+    if (boxHidden) { this.isDialogueActive = false; return; }   // 대화창이 사라졌는데 대화 중으로 남아 있는 경우
+    if (hasChoices || thinkOpen || promptOn || anyModal || overlay) { this._stuck = 0; return; }
+    this._stuck = (this._stuck || 0) + 1;
+    if (this._stuck >= 2 && prompt) {
+      prompt.classList.remove('hidden');
+      prompt.onclick = () => this.closeDialogue();
+      this._stuck = 0;
+    }
   }
 
   renderChoices(choices, npcKey) {
