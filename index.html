@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>COLOR UP SCHOOL : 학교를 바꾸는 선택 | 성장형 양성평등 RPG</title>
+  <meta name="description" content="나의 선택이 사람과 학교 문화를 바꾼다! 흑백의 학교를 양성평등한 선택으로 컬러풀하게 물들이는 성장형 시뮬레이션 RPG 게임.">
+  
+  <!-- Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Galmuri11:wght@400;700&family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Main Game Container -->
+  <div id="game-app">
+    
+    <!-- Title / Intro Screen -->
+    <div id="title-screen" class="screen active">
+      <div class="title-bg-particles"></div>
+      <div class="title-card">
+        <div class="title-badge">성장형 양성평등 시뮬레이션 RPG</div>
+        <h1 class="title-logo">
+          <span class="color-text color-c">C</span><span class="color-text color-o">O</span><span class="color-text color-l">L</span><span class="color-text color-o2">O</span><span class="color-text color-r">R</span>
+          <span class="sub-up">UP</span>
+          <span class="school-title">SCHOOL</span>
+        </h1>
+        <p class="title-subtitle">학교를 바꾸는 선택</p>
+        <p class="title-motto">“나의 선택이 사람과 학교 문화를 바꾼다”</p>
+        
+        <div class="character-select-box">
+          <label for="player-name-input">주인공 이름 입력:</label>
+          <div class="input-row">
+            <input type="text" id="player-name-input" maxlength="6" value="루다" placeholder="이름을 입력하세요">
+          </div>
+          <div class="avatar-select-row">
+            <span class="avatar-label">주인공 캐릭터 스타일:</span>
+            <div class="avatar-options">
+              <button class="avatar-btn active" data-avatar="1">
+                <span class="avatar-icon ruda-avatar" style="background-image: url('assets/images/player_standing.png'); background-position: top center; background-size: cover;"></span>
+                <span>루다 (기본 정복)</span>
+              </button>
+              <button class="avatar-btn" data-avatar="2">
+                <span class="avatar-icon girl-avatar"></span>
+                <span>카디건 스타일</span>
+              </button>
+              <button class="avatar-btn" data-avatar="3">
+                <span class="avatar-icon neutral-avatar"></span>
+                <span>스마트 스타일</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="title-buttons">
+          <button id="btn-start-game" class="rpg-btn btn-primary pulse-btn">
+            <span class="btn-icon">🎮</span> 게임 시작하기
+          </button>
+          <button id="btn-how-to-play" class="rpg-btn btn-secondary">
+            <span class="btn-icon">📖</span> 게임 방법 & 콘셉트
+          </button>
+        </div>
+
+        <div class="title-footer-tips">
+          💡 모바일에서는 <b>오른쪽 아래 조이스틱</b> 또는 <b>화면 터치</b>로 자유롭게 이동할 수 있습니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="how-to-modal" class="modal-backdrop hidden">
+      <div class="rpg-modal">
+        <div class="modal-header">
+          <h2>🌈 게임 방법 & 세계관 가이드</h2>
+          <button class="btn-close-modal" id="btn-close-how">✕</button>
+        </div>
+        <div class="modal-body custom-scroll">
+          <div class="guide-section">
+            <h3>🏫 1. 색을 잃은 학교</h3>
+            <p>전학 첫날, 성별 고정관념과 차별이 만연한 학교는 <b>흑백·회색톤</b>으로 어둡게 물들어 있습니다. 친구들을 만나고 양성평등한 선택을 하여 학교에 아름다운 색채를 되찾아주세요!</p>
+          </div>
+          <div class="guide-section">
+            <h3>📊 2. 5대 성장 능력치</h3>
+            <div class="stat-guide-grid">
+              <div class="stat-guide-card"><span class="stat-icon stat-courage">🦁</span><b>용기</b><p>부당함에 침묵하지 않고 목소리를 내는 힘</p></div>
+              <div class="stat-guide-card"><span class="stat-icon stat-empathy">💖</span><b>공감</b><p>상대방의 아픔과 고민을 깊이 헤아리는 마음</p></div>
+              <div class="stat-guide-card"><span class="stat-icon stat-respect">🤝</span><b>존중</b><p>성별과 관계없이 한 사람의 개성을 인정하는 태도</p></div>
+              <div class="stat-guide-card"><span class="stat-icon stat-opportunity">🌟</span><b>기회</b><p>누구에게나 공평한 참여와 역할을 열어주는 배려</p></div>
+              <div class="stat-guide-card"><span class="stat-icon stat-freedom">🕊️</span><b>자유</b><p>성별 고정관념에서 벗어나 나답게 꿈꿀 권리</p></div>
+            </div>
+          </div>
+          <div class="guide-section">
+            <h3>🕹️ 3. 조작 방법</h3>
+            <ul>
+              <li><b>PC:</b> 방향키 / W, A, S, D로 이동, Space 또는 Enter로 대화/상호작용</li>
+              <li><b>모바일:</b> 우측 하단 <b>가상 조이스틱</b> 또는 화면을 터치/드래그하여 이동</li>
+              <li><b>대화:</b> NPC 가까이 접근하면 자동으로 대화 말풍선이 열립니다.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="rpg-btn btn-primary" id="btn-confirm-how">알겠어요!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Game Play View -->
+    <div id="game-view" class="screen">
+      <!-- 2D Canvas for RPG World -->
+      <div id="canvas-wrapper">
+        <canvas id="game-canvas"></canvas>
+        <div id="color-bloom-overlay"></div>
+        <div id="ambient-light-overlay"></div>
+      </div>
+
+      <!-- Top HUD Header -->
+      <header id="game-hud">
+        <div class="hud-left">
+          <div class="location-badge" id="current-location-display">
+            <span class="loc-icon">🏫</span>
+            <span class="loc-name">1층 중앙 복도</span>
+          </div>
+          <div class="act-indicator" id="current-act-display">
+            <span class="act-tag">ACT 1</span>
+            <span class="act-title">색을 잃은 학교</span>
+          </div>
+        </div>
+
+        <div class="hud-center">
+          <!-- School Color Recovery Progress Gauge -->
+          <div class="color-gauge-container" title="학교 색채 복원도">
+            <div class="gauge-label-row">
+              <span class="gauge-title">🎨 학교 색채 복원율</span>
+              <span class="gauge-percent" id="color-percent-text">0%</span>
+            </div>
+            <div class="gauge-bar-outer">
+              <div class="gauge-bar-inner" id="color-progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <!-- Top Action Buttons -->
+          <button id="btn-open-sns" class="hud-icon-btn" title="학교 SNS (스쿨그램)">
+            <span class="hud-btn-icon">📱</span>
+            <span class="hud-badge-dot" id="sns-badge-dot"></span>
+            <span class="hud-btn-text">SNS</span>
+          </button>
+          <button id="btn-open-status" class="hud-icon-btn" title="능력치 & 도감">
+            <span class="hud-btn-icon">📊</span>
+            <span class="hud-btn-text">능력치</span>
+          </button>
+          <button id="btn-open-map" class="hud-icon-btn" title="학교 전체 맵">
+            <span class="hud-btn-icon">🗺️</span>
+            <span class="hud-btn-text">지도</span>
+          </button>
+          <button id="btn-toggle-audio" class="hud-icon-btn" title="배경음악 ON/OFF">
+            <span class="hud-btn-icon" id="audio-icon">🔊</span>
+            <span class="hud-btn-text">BGM</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Stat Mini Bar Floater (Under HUD) -->
+      <div id="stat-floater-bar">
+        <div class="stat-mini-chip" data-stat="courage" title="용기">
+          <span class="chip-icon">🦁</span>
+          <span class="chip-val" id="val-courage">10</span>
+        </div>
+        <div class="stat-mini-chip" data-stat="empathy" title="공감">
+          <span class="chip-icon">💖</span>
+          <span class="chip-val" id="val-empathy">10</span>
+        </div>
+        <div class="stat-mini-chip" data-stat="respect" title="존중">
+          <span class="chip-icon">🤝</span>
+          <span class="chip-val" id="val-respect">10</span>
+        </div>
+        <div class="stat-mini-chip" data-stat="opportunity" title="기회">
+          <span class="chip-icon">🌟</span>
+          <span class="chip-val" id="val-opportunity">10</span>
+        </div>
+        <div class="stat-mini-chip" data-stat="freedom" title="자유">
+          <span class="chip-icon">🕊️</span>
+          <span class="chip-val" id="val-freedom">10</span>
+        </div>
+      </div>
+
+      <!-- Current Quest / Mission Tracker Box -->
+      <div id="quest-tracker-box">
+        <div class="quest-header">
+          <span class="quest-pin">📌</span>
+          <span class="quest-label">현재 탐색 목표</span>
+        </div>
+        <div class="quest-content" id="quest-desc-text">
+          학교를 둘러보며 고민에 빠진 친구들과 대화해보세요.
+        </div>
+      </div>
+
+      <!-- Dynamic Notification Toast / Stat Gain Popup -->
+      <div id="toast-container"></div>
+
+      <!-- Door Portal Proximity Popup (Arpia Style: Door Name + 들어가기 button) -->
+      <div id="door-portal-prompt" class="door-portal-badge hidden">
+        <div class="door-portal-plaque">
+          <span class="portal-ornament-l">❦</span>
+          <span class="door-portal-title" id="door-portal-title">2학년 3반 교실</span>
+          <span class="portal-ornament-r">❧</span>
+        </div>
+        <button class="door-portal-btn" id="door-portal-enter-btn">
+          <span>들어가기</span>
+        </button>
+      </div>
+
+      <!-- Dialogue / Interaction Window (Classic Arpia Visual Novel Style) -->
+      <div id="dialogue-box" class="dialogue-container hidden">
+        <!-- Standing Character CG Stage (Left: Player / Right: NPC) -->
+        <div class="dialogue-standing-stage">
+          <div class="standing-cg standing-left" id="standing-left-box">
+            <img id="standing-player-img" src="assets/images/player_standing.png" alt="주인공">
+            <div class="standing-nameplate" id="standing-player-name">루다</div>
+          </div>
+          <div class="standing-cg standing-right" id="standing-right-box">
+            <img id="standing-npc-img" src="assets/images/sua_standing.png" alt="NPC">
+            <div class="standing-nameplate" id="standing-npc-name">수아</div>
+          </div>
+        </div>
+
+        <!-- Arpia Vintage Ornate Dialogue Box -->
+        <div class="arpia-dialogue-window">
+          <div class="arpia-dialogue-topbar">
+            <div class="arpia-speaker-badge">
+              <span class="speaker-gem">💎</span>
+              <span class="speaker-name" id="dialogue-speaker">수아</span>
+            </div>
+            <div class="dialogue-npc-trust" id="npc-trust-display" title="NPC 신뢰도">
+              <span class="trust-heart">❤️</span>
+              <span class="trust-val" id="npc-trust-val">신뢰도 20%</span>
+            </div>
+          </div>
+
+          <!-- Dialogue Text Body -->
+          <div class="arpia-dialogue-body">
+            <div class="arpia-dialogue-text" id="dialogue-text">
+              대화 텍스트가 표시됩니다...
+            </div>
+            
+            <!-- Choice Options Box -->
+            <div class="arpia-dialogue-choices" id="dialogue-choices">
+              <!-- Dynamically injected choices -->
+            </div>
+          </div>
+
+          <!-- Dialogue Advance Indicator Button -->
+          <div class="arpia-dialogue-footer">
+            <div class="dialogue-next-prompt hidden" id="dialogue-next-prompt">
+              <button class="arpia-next-btn">다음 (Space / 터치) ▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arpia Mission Clear / Stat Reward Modal (Image 3 Style) -->
+      <div id="mission-reward-modal" class="modal-backdrop hidden">
+        <div class="arpia-reward-modal">
+          <div class="arpia-reward-header">
+            <span class="arpia-reward-title" id="reward-modal-title">미션 완료</span>
+          </div>
+          <div class="arpia-reward-body">
+            <div class="arpia-reward-text" id="reward-modal-text">
+              미션을 완료하였습니다.<br>
+              양성평등 선행 점수를 획득했습니다.
+            </div>
+          </div>
+          <div class="arpia-reward-footer">
+            <button class="arpia-ok-btn" id="btn-reward-confirm">
+              <span class="ok-icon-dot">◎</span> 확인
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bias Detector Quick Popup (편견 탐지 이벤트) -->
+      <div id="bias-detector-modal" class="modal-backdrop hidden">
+        <div class="rpg-modal bias-modal">
+          <div class="modal-header bias-header">
+            <span class="bias-alarm-icon">⚠️</span>
+            <h2>[편견 탐지 발생!] 고정관념을 발견했습니다</h2>
+          </div>
+          <div class="modal-body">
+            <div class="bias-quote-card" id="bias-quote-text">
+              “남자는 원래 감정표현을 못하고, 여자는 수학에 약해.”
+            </div>
+            <p class="bias-instruction">
+              이 문장 속 성별 고정관념에 대응하는 <b>가장 바람직한 양성평등적 판단</b>을 선택하세요:
+            </p>
+            <div class="bias-options" id="bias-options-list">
+              <!-- Choices injected dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual Controls for Mobile / Touch -->
+      <div id="touch-controls-layer">
+        <!-- Floating Interaction Button for Mobile -->
+        <button id="touch-action-btn" class="touch-btn-action" title="상호작용 / 대화">
+          <span class="touch-action-icon">💬</span>
+          <span class="touch-action-label">대화</span>
+        </button>
+
+        <!-- Touch Virtual Joystick (Bottom-Right as requested!) -->
+        <div id="virtual-joystick-container">
+          <div id="joystick-base">
+            <div id="joystick-stick"></div>
+            <div class="joystick-arrows">
+              <span class="arrow-up">▲</span>
+              <span class="arrow-down">▼</span>
+              <span class="arrow-left">◀</span>
+              <span class="arrow-right">▶</span>
+            </div>
+          </div>
+          <div class="joystick-helper-label">이동 조이스틱</div>
+        </div>
+      </div>
+
+      <!-- School Campus Layout Map Guide Modal (View Only - No auto warp) -->
+      <div id="map-modal" class="modal-backdrop hidden">
+        <div class="rpg-modal map-modal">
+          <div class="modal-header">
+            <h2>🗺️ 학교 구조 안내도 (캠퍼스 맵)</h2>
+            <button class="btn-close-modal" id="btn-close-map">✕</button>
+          </div>
+          <div class="modal-body custom-scroll">
+            <div class="map-guide-header">
+              <span class="map-guide-badge">📍 1층 중앙 복도를 통해 모든 구역으로 직접 이동할 수 있습니다</span>
+            </div>
+            <div class="room-grid" id="room-selection-grid">
+              <!-- Rendered via JS -->
+            </div>
+            <div class="map-footer-guide">
+              💡 <b>이동 안내:</b> 원하는 장소로 가려면 <b>1층 중앙 복도</b>의 해당 문 앞으로 직접 걸어가서 [들어가기]를 누르세요.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status & Stats Modal -->
+      <div id="status-modal" class="modal-backdrop hidden">
+        <div class="rpg-modal status-modal">
+          <div class="modal-header">
+            <h2>📊 성장 능력치 & 수집 배지</h2>
+            <button class="btn-close-modal" id="btn-close-status">✕</button>
+          </div>
+          <div class="modal-body custom-scroll">
+            <div class="stats-overview-grid">
+              <div class="stat-card-large">
+                <div class="stat-card-top">
+                  <span class="stat-big-icon">🦁</span>
+                  <div class="stat-card-info">
+                    <h4>용기 (Courage)</h4>
+                    <span class="stat-score-badge" id="modal-val-courage">10 P</span>
+                  </div>
+                </div>
+                <div class="stat-bar-full"><div class="stat-fill fill-courage" id="modal-bar-courage" style="width: 10%;"></div></div>
+                <p class="stat-desc">성차별이나 고정관념에 맞서 목소리를 내는 실천력</p>
+              </div>
+
+              <div class="stat-card-large">
+                <div class="stat-card-top">
+                  <span class="stat-big-icon">💖</span>
+                  <div class="stat-card-info">
+                    <h4>공감 (Empathy)</h4>
+                    <span class="stat-score-badge" id="modal-val-empathy">10 P</span>
+                  </div>
+                </div>
+                <div class="stat-bar-full"><div class="stat-fill fill-empathy" id="modal-bar-empathy" style="width: 10%;"></div></div>
+                <p class="stat-desc">친구들이 겪는 차별과 편견의 아픔을 진심으로 이해하는 마음</p>
+              </div>
+
+              <div class="stat-card-large">
+                <div class="stat-card-top">
+                  <span class="stat-big-icon">🤝</span>
+                  <div class="stat-card-info">
+                    <h4>존중 (Respect)</h4>
+                    <span class="stat-score-badge" id="modal-val-respect">10 P</span>
+                  </div>
+                </div>
+                <div class="stat-bar-full"><div class="stat-fill fill-respect" id="modal-bar-respect" style="width: 10%;"></div></div>
+                <p class="stat-desc">성별 구분 없이 서로의 고유한 개성과 권리를 소중히 여기는 태도</p>
+              </div>
+
+              <div class="stat-card-large">
+                <div class="stat-card-top">
+                  <span class="stat-big-icon">🌟</span>
+                  <div class="stat-card-info">
+                    <h4>기회 (Opportunity)</h4>
+                    <span class="stat-score-badge" id="modal-val-opportunity">10 P</span>
+                  </div>
+                </div>
+                <div class="stat-bar-full"><div class="stat-fill fill-opportunity" id="modal-bar-opportunity" style="width: 10%;"></div></div>
+                <p class="stat-desc">누구에게나 차별 없이 동등한 활동과 진로의 문을 열어주는 노력</p>
+              </div>
+
+              <div class="stat-card-large">
+                <div class="stat-card-top">
+                  <span class="stat-big-icon">🕊️</span>
+                  <div class="stat-card-info">
+                    <h4>자유 (Freedom)</h4>
+                    <span class="stat-score-badge" id="modal-val-freedom">10 P</span>
+                  </div>
+                </div>
+                <div class="stat-bar-full"><div class="stat-fill fill-freedom" id="modal-bar-freedom" style="width: 10%;"></div></div>
+                <p class="stat-desc">성별 틀에 얽매이지 않고 자신이 원하는 진정한 꿈을 펼칠 자유</p>
+              </div>
+            </div>
+
+            <div class="badges-section">
+              <h3>🎖️ 획득한 양성평등 배지</h3>
+              <div class="badge-grid" id="badge-collection-grid">
+                <!-- Badges injected dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- School SNS (SchoolGram) Modal -->
+      <div id="sns-modal" class="modal-backdrop hidden">
+        <div class="rpg-modal sns-phone-modal">
+          <div class="phone-frame">
+            <div class="phone-notch">
+              <span class="phone-time" id="phone-clock">12:30</span>
+              <span class="phone-signal">📶 5G 🔋 98%</span>
+            </div>
+            <div class="phone-app-header">
+              <div class="app-title-box">
+                <span class="app-logo-icon">📸</span>
+                <h3>스쿨그램 (SchoolGram)</h3>
+              </div>
+              <button class="btn-close-modal" id="btn-close-sns">✕</button>
+            </div>
+            
+            <div class="sns-feed-container custom-scroll" id="sns-feed-list">
+              <!-- Realtime SNS posts react to user choices -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Final Boss Battle Screen (편견의 코어) -->
+    <div id="boss-battle-screen" class="screen hidden">
+      <div class="boss-bg-container">
+        <div class="boss-core-vortex" id="boss-core-element">
+          <div class="core-inner-eye"></div>
+          <div class="core-ring ring-1"></div>
+          <div class="core-ring ring-2"></div>
+          <div class="core-ring ring-3"></div>
+          <div class="orbiting-bias-phrases" id="orbiting-phrases-container">
+            <!-- Floating prejudice phrases -->
+          </div>
+        </div>
+      </div>
+
+      <div class="boss-hud">
+        <div class="boss-info-panel">
+          <div class="boss-name-tag">
+            <span class="boss-icon">👁️</span>
+            <h2>ACT 6 : 학교를 짓누르는 [편견과 고정관념의 코어]</h2>
+          </div>
+          <div class="boss-hp-container">
+            <div class="boss-hp-label">
+              <span>편견의 결속력 (Core HP)</span>
+              <span id="boss-hp-text">100 / 100</span>
+            </div>
+            <div class="boss-hp-bar-outer">
+              <div class="boss-hp-bar-inner" id="boss-hp-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="boss-battle-log-card" id="boss-log-text">
+          학교 깊은 곳에 웅크린 편견의 코어가 차별과 고정관념의 말을 내뿜고 있습니다! 모아온 양성평등 에너지를 발동해 편견을 정화하세요!
+        </div>
+
+        <!-- Boss Action Skills Grid -->
+        <div class="boss-skills-grid">
+          <button class="boss-skill-btn btn-skill-courage" data-skill="courage">
+            <div class="skill-icon">🦁</div>
+            <div class="skill-info">
+              <b>용기의 외침</b>
+              <span>침묵을 깨고 진실을 말한다 (용기 에너지)</span>
+            </div>
+          </button>
+          <button class="boss-skill-btn btn-skill-empathy" data-skill="empathy">
+            <div class="skill-icon">💖</div>
+            <div class="skill-info">
+              <b>공감의 방패</b>
+              <span>상처받은 마음에 다가선다 (공감 에너지)</span>
+            </div>
+          </button>
+          <button class="boss-skill-btn btn-skill-respect" data-skill="respect">
+            <div class="skill-icon">🤝</div>
+            <div class="skill-info">
+              <b>존중의 빛</b>
+              <span>다양성을 포용하고 인정한다 (존중 에너지)</span>
+            </div>
+          </button>
+          <button class="boss-skill-btn btn-skill-opportunity" data-skill="opportunity">
+            <div class="skill-icon">🌟</div>
+            <div class="skill-info">
+              <b>기회의 열쇠</b>
+              <span>모두를 위한 문을 열어준다 (기회 에너지)</span>
+            </div>
+          </button>
+          <button class="boss-skill-btn btn-skill-freedom" data-skill="freedom">
+            <div class="skill-icon">🕊️</div>
+            <div class="skill-info">
+              <b>자유의 날개</b>
+              <span>고정관념의 껍질을 부순다 (자유 에너지)</span>
+            </div>
+          </button>
+          <button class="boss-skill-btn btn-skill-rainbow" id="btn-rainbow-burst" data-skill="rainbow" disabled>
+            <div class="skill-icon">🌈</div>
+            <div class="skill-info">
+              <b>양성평등 프리즘 버스트</b>
+              <span>모든 색채의 완벽한 융합!</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ending & Result Screen -->
+    <div id="ending-screen" class="screen hidden">
+      <div class="ending-container custom-scroll">
+        <div class="ending-header-card">
+          <div class="ending-badge" id="ending-type-badge">ENDING TYPE A</div>
+          <h1 class="ending-title" id="ending-title-text">🌈 COLORFUL SCHOOL : 찬란하게 꽃피는 다양성의 학교</h1>
+          <p class="ending-summary" id="ending-summary-text">
+            당신의 용기 있는 선택들이 모여, 학교는 서로를 존중하고 자유롭게 꿈꿀 수 있는 컬러풀한 공간으로 다시 태어났습니다!
+          </p>
+        </div>
+
+        <!-- Visual School Aftermath Preview -->
+        <div class="school-result-visual-box">
+          <div class="school-visual-canvas-card">
+            <canvas id="ending-school-canvas" width="600" height="260"></canvas>
+            <div class="canvas-caption">✨ 당신이 완성한 학교의 모습</div>
+          </div>
+        </div>
+
+        <!-- 5 Stats Score Breakdown -->
+        <div class="result-stats-section">
+          <h3>📊 최종 양성평등 리더십 지표</h3>
+          <div class="result-stats-grid">
+            <div class="stat-result-box stat-res-courage">
+              <span class="icon">🦁</span>
+              <span class="label">용기</span>
+              <span class="value" id="end-val-courage">85</span>
+            </div>
+            <div class="stat-result-box stat-res-empathy">
+              <span class="icon">💖</span>
+              <span class="label">공감</span>
+              <span class="value" id="end-val-empathy">90</span>
+            </div>
+            <div class="stat-result-box stat-res-respect">
+              <span class="icon">🤝</span>
+              <span class="label">존중</span>
+              <span class="value" id="end-val-respect">95</span>
+            </div>
+            <div class="stat-result-box stat-res-opportunity">
+              <span class="icon">🌟</span>
+              <span class="label">기회</span>
+              <span class="value" id="end-val-opportunity">88</span>
+            </div>
+            <div class="stat-result-box stat-res-freedom">
+              <span class="icon">🕊️</span>
+              <span class="label">자유</span>
+              <span class="value" id="end-val-freedom">92</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comprehensive Educational Feedback -->
+        <div class="feedback-card">
+          <h3>📝 종합 교육 피드백 리포트</h3>
+          <div class="feedback-text" id="ending-feedback-text">
+            <!-- Dynamically generated evaluation -->
+          </div>
+        </div>
+
+        <!-- Reflection Activity & Action Pledge Card -->
+        <div class="reflection-section">
+          <h3>✍️ 사후 성찰 활동 & 나의 양성평등 실천 약속</h3>
+          <p class="reflection-sub">게임을 마무리하며 자신의 생각을 정리하고 실천 카드를 발급받아 보세요.</p>
+          
+          <div class="reflection-form">
+            <div class="form-group">
+              <label>1. 이번 게임에서 가장 깊이 고민했던 선택은 무엇이었나요?</label>
+              <textarea id="reflect-q1" rows="2" placeholder="예: 축구부에 들어가고 싶어 하는 여학생을 응원할 때 친구들의 시선이 걱정되었지만 지지해 준 순간"></textarea>
+            </div>
+            <div class="form-group">
+              <label>2. 게임을 통해 새롭게 깨닫게 된 성별 고정관념이나 편견이 있다면?</label>
+              <textarea id="reflect-q2" rows="2" placeholder="예: 남자는 울면 안 된다거나 여학생과 남학생의 역할을 미리 단정 짓는 것이 편견임을 알게 됨"></textarea>
+            </div>
+            <div class="form-group">
+              <label>3. 실제 학교생활에서 성차별적 상황을 마주친다면 어떻게 행동하고 싶나요?</label>
+              <textarea id="reflect-q3" rows="2" placeholder="예: 불편한 농담에 동조하지 않고, 당사자의 편이 되어주며 올바른 방향을 이야기하겠습니다."></textarea>
+            </div>
+            <div class="form-group">
+              <label>4. 🌟 우리 학교를 위해 실천할 나의 한 줄 양성평등 다짐:</label>
+              <input type="text" id="pledge-one-line" maxlength="40" placeholder="예: 성별의 틀을 넘어 서로의 꿈과 개성을 끝까지 응원하는 친구가 되겠습니다!">
+            </div>
+
+            <button id="btn-generate-card" class="rpg-btn btn-primary btn-pledge">
+              🎖️ 양성평등 챔피언 실천 카드 발급 & 확인
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable / Downloadable Pledge Certificate Card Modal -->
+        <div id="pledge-card-container" class="pledge-card-wrapper hidden">
+          <div class="pledge-certificate" id="pledge-card-print">
+            <div class="cert-border">
+              <div class="cert-header">
+                <span class="cert-icon">🏅</span>
+                <h2>양성평등 챔피언 실천 서약서</h2>
+                <span class="cert-sub">COLOR UP SCHOOL CHAMPION</span>
+              </div>
+              
+              <div class="cert-body">
+                <p class="cert-greet">위 사람 <b><span id="cert-player-name">루다</span></b> 학생은 『COLOR UP SCHOOL』 여정을 통해 성별 고정관념을 타파하고 존중과 다양성이 살아 숨 쉬는 학교 문화를 만드는 데 앞장섰기에 이 증서를 수여합니다.</p>
+                
+                <div class="cert-quote-box">
+                  <span class="quote-label">💡 나의 실천 약속</span>
+                  <p class="quote-content" id="cert-pledge-text">“성별의 틀을 넘어 서로의 꿈과 개성을 끝까지 응원하는 친구가 되겠습니다!”</p>
+                </div>
+
+                <div class="cert-stats-summary">
+                  <span>용기: <b id="cert-s-courage">85</b></span>
+                  <span>공감: <b id="cert-s-empathy">90</b></span>
+                  <span>존중: <b id="cert-s-respect">95</b></span>
+                  <span>기회: <b id="cert-s-opportunity">88</b></span>
+                  <span>자유: <b id="cert-s-freedom">92</b></span>
+                </div>
+              </div>
+
+              <div class="cert-footer">
+                <div class="cert-date" id="cert-date-text">2026. 09. 30</div>
+                <div class="cert-stamp">COLOR UP<br>SCHOOL</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pledge-actions">
+            <button id="btn-print-pledge" class="rpg-btn btn-secondary">🖨️ 카드 인쇄 / 저장</button>
+            <button id="btn-restart-game" class="rpg-btn btn-primary">🔄 처음부터 다시 플레이</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Audio Engine & Modules -->
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/scenarios.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/sns.js"></script>
+  <script src="js/boss.js"></script>
+  <script src="js/ending.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
